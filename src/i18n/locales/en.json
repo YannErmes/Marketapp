@@ -1,0 +1,112 @@
+{
+  "header": {
+    "home": "Home",
+    "marketplace": "Marketplace",
+    "searchProducts": "Search products..."
+  },
+  "home": {
+    "welcome": "Welcome to",
+    "brandName": "Foreign Market",
+    "tagline": "Your gateway to authentic products from home",
+    "browseMarketplace": "Browse Marketplace",
+    "tasteOfHome": "A Taste of Home, Wherever You Are",
+    "tasteOfHomeDesc": "Missing home? We bring your favorite products to Morocco.",
+    "tasteOfHomeHighlight": "Authentic. Delivered. Just like home.",
+    "bestSellers": "Best Sellers",
+    "bestSellersDesc": "Most popular products on our platform",
+    "viewAll": "View All",
+    "readyToExplore": "Ready to Explore?",
+    "readyToExploreDesc": "Discover thousands of authentic products from sellers who understand what you're looking for.",
+    "startShopping": "Start Shopping"
+  },
+  "culture": {
+    "title": "Taste the World",
+    "subtitle": "From every corner of the globe to your table. Discover authentic dishes that make you feel at home.",
+    "aboutDish": "About the Dish",
+    "whyMainstream": "Why It Became Mainstream",
+    "whereToFind": "Where to Find It"
+  },
+  "marketplace": {
+    "title": "Marketplace",
+    "subtitle": "Discover authentic products from around the world",
+    "showing": "Showing",
+    "products": "products",
+    "noProducts": "No products found matching your filters.",
+    "loading": "Loading products...",
+    "errorLoading": "Failed to load products. Please try again.",
+    "totalProducts": "Total Products",
+    "totalValue": "Total Value"
+  },
+  "filter": {
+    "category": "Category",
+    "allCategories": "All Categories",
+    "seller": "Seller",
+    "searchSeller": "Search by seller name...",
+    "sortBy": "Sort By",
+    "trending": "Trending",
+    "highestRated": "Highest Rated",
+    "priceLowHigh": "Price: Low to High",
+    "priceHighLow": "Price: High to Low"
+  },
+  "product": {
+    "bestSeller": "Best Seller",
+    "by": "by",
+    "addToCart": "Add to Cart",
+    "add": "Add",
+    "addedToCart": "Added to cart",
+    "addedToCartDesc": "has been added to your cart.",
+    "productNotFound": "Product not found",
+    "backToMarketplace": "Back to Marketplace",
+    "soldBy": "Sold by",
+    "productDescription": "Product Description",
+    "contactSeller": "Contact Seller",
+    "viewLocation": "View Location",
+    "shareProduct": "Share Product",
+    "productLocation": "Product Location",
+    "openInGoogleMaps": "Open in Google Maps",
+    "linkCopied": "Link copied!",
+    "linkCopiedDesc": "Product link has been copied to clipboard.",
+    "loading": "Loading product...",
+    "errorLoading": "Failed to load product. Please try again."
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "emptyDesc": "Add some products to get started!",
+    "talkToSeller": "Talk to Seller",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "note": "Note: Contact each seller individually to arrange payment and delivery."
+  },
+  "seller": {
+    "notFound": "Seller not found",
+    "products": "products",
+    "contactSeller": "Contact Seller",
+    "productsFromSeller": "Products from this seller",
+    "backToMarketplace": "Back to Marketplace",
+    "loading": "Loading seller...",
+    "errorLoading": "Failed to load seller. Please try again."
+  },
+  "footer": {
+    "tagline": "Your gateway to authentic products from home",
+    "quickLinks": "Quick Links",
+    "aboutUs": "About Us",
+    "contact": "Contact",
+    "legal": "Legal",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "cookies": "Cookie Policy",
+    "followUs": "Follow Us",
+    "copyright": "All rights reserved."
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Oops! Page not found",
+    "returnHome": "Return to Home"
+  },
+  "languages": {
+    "en": "English",
+    "fr": "Français",
+    "ar": "العربية"
+  }
+}

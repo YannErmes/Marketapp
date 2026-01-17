@@ -1,0 +1,103 @@
+{
+  "header": {
+    "home": "Accueil",
+    "marketplace": "Marché",
+    "searchProducts": "Rechercher des produits..."
+  },
+  "home": {
+    "welcome": "Bienvenue sur",
+    "brandName": "Foreign Market",
+    "tagline": "Votre passerelle vers des produits authentiques de chez vous",
+    "browseMarketplace": "Parcourir le Marché",
+    "tasteOfHome": "Un Goût de Chez Soi, Où Que Vous Soyez",
+    "tasteOfHomeDesc": "Votre pays vous manque ? Nous apportons vos produits préférés au Maroc.",
+    "tasteOfHomeHighlight": "Authentique. Livré. Comme à la maison.",
+    "bestSellers": "Meilleures Ventes",
+    "bestSellersDesc": "Les produits les plus populaires sur notre plateforme",
+    "viewAll": "Voir Tout",
+    "readyToExplore": "Prêt à Explorer ?",
+    "readyToExploreDesc": "Découvrez des milliers de produits authentiques de vendeurs qui comprennent ce que vous recherchez.",
+    "startShopping": "Commencer vos Achats"
+  },
+  "culture": {
+    "title": "Goûtez le Monde",
+    "subtitle": "De chaque coin du globe à votre table. Découvrez des plats authentiques qui vous font vous sentir chez vous.",
+    "aboutDish": "À Propos du Plat",
+    "whyMainstream": "Pourquoi C'est Devenu Populaire",
+    "whereToFind": "Où le Trouver"
+  },
+  "marketplace": {
+    "title": "Marché",
+    "subtitle": "Découvrez des produits authentiques du monde entier",
+    "showing": "Affichage de",
+    "products": "produits",
+    "noProducts": "Aucun produit trouvé correspondant à vos filtres."
+  },
+  "filter": {
+    "category": "Catégorie",
+    "allCategories": "Toutes les Catégories",
+    "seller": "Vendeur",
+    "searchSeller": "Rechercher par nom de vendeur...",
+    "sortBy": "Trier Par",
+    "trending": "Tendance",
+    "highestRated": "Mieux Notés",
+    "priceLowHigh": "Prix : Croissant",
+    "priceHighLow": "Prix : Décroissant"
+  },
+  "product": {
+    "bestSeller": "Meilleure Vente",
+    "by": "par",
+    "addToCart": "Ajouter au Panier",
+    "add": "Ajouter",
+    "addedToCart": "Ajouté au panier",
+    "addedToCartDesc": "a été ajouté à votre panier.",
+    "productNotFound": "Produit non trouvé",
+    "backToMarketplace": "Retour au Marché",
+    "soldBy": "Vendu par",
+    "productDescription": "Description du Produit",
+    "contactSeller": "Contacter le Vendeur sur WhatsApp",
+    "viewLocation": "Voir l'Emplacement",
+    "shareProduct": "Partager le Produit",
+    "productLocation": "Emplacement du Produit",
+    "openInGoogleMaps": "Ouvrir dans Google Maps",
+    "linkCopied": "Lien copié !",
+    "linkCopiedDesc": "Le lien du produit a été copié dans le presse-papiers."
+  },
+  "cart": {
+    "title": "Panier",
+    "empty": "Votre panier est vide",
+    "emptyDesc": "Ajoutez des produits pour commencer !",
+    "talkToSeller": "Parler au Vendeur",
+    "subtotal": "Sous-total",
+    "total": "Total",
+    "note": "Note : Contactez chaque vendeur individuellement pour organiser le paiement et la livraison."
+  },
+  "seller": {
+    "notFound": "Vendeur non trouvé",
+    "products": "produits",
+    "contactSeller": "Contacter le Vendeur",
+    "productsFromSeller": "Produits de ce vendeur"
+  },
+  "footer": {
+    "tagline": "Votre passerelle vers des produits authentiques de chez vous",
+    "quickLinks": "Liens Rapides",
+    "aboutUs": "À Propos",
+    "contact": "Contact",
+    "legal": "Mentions Légales",
+    "terms": "Conditions d'Utilisation",
+    "privacy": "Politique de Confidentialité",
+    "cookies": "Politique des Cookies",
+    "followUs": "Suivez-nous",
+    "copyright": "Tous droits réservés."
+  },
+  "notFound": {
+    "title": "404",
+    "message": "Oups ! Page non trouvée",
+    "returnHome": "Retour à l'Accueil"
+  },
+  "languages": {
+    "en": "English",
+    "fr": "Français",
+    "ar": "العربية"
+  }
+}

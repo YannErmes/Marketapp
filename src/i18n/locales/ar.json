@@ -1,0 +1,103 @@
+{
+  "header": {
+    "home": "الرئيسية",
+    "marketplace": "السوق",
+    "searchProducts": "البحث عن منتجات..."
+  },
+  "home": {
+    "welcome": "مرحباً بكم في",
+    "brandName": "فورين ماركت",
+    "tagline": "بوابتك إلى المنتجات الأصلية من بلدك",
+    "browseMarketplace": "تصفح السوق",
+    "tasteOfHome": "طعم الوطن، أينما كنت",
+    "tasteOfHomeDesc": "تشتاق للوطن؟ نحن نجلب منتجاتك المفضلة إلى المغرب.",
+    "tasteOfHomeHighlight": "أصيل. يُوصل. تماماً كالبيت.",
+    "bestSellers": "الأكثر مبيعاً",
+    "bestSellersDesc": "المنتجات الأكثر شعبية على منصتنا",
+    "viewAll": "عرض الكل",
+    "readyToExplore": "هل أنت مستعد للاستكشاف؟",
+    "readyToExploreDesc": "اكتشف آلاف المنتجات الأصلية من بائعين يفهمون ما تبحث عنه.",
+    "startShopping": "ابدأ التسوق"
+  },
+  "culture": {
+    "title": "تذوق العالم",
+    "subtitle": "من كل ركن في العالم إلى مائدتك. اكتشف أطباقاً أصيلة تجعلك تشعر وكأنك في بيتك.",
+    "aboutDish": "عن الطبق",
+    "whyMainstream": "لماذا أصبح شائعاً",
+    "whereToFind": "أين تجده"
+  },
+  "marketplace": {
+    "title": "السوق",
+    "subtitle": "اكتشف منتجات أصيلة من جميع أنحاء العالم",
+    "showing": "عرض",
+    "products": "منتج",
+    "noProducts": "لم يتم العثور على منتجات مطابقة للفلاتر."
+  },
+  "filter": {
+    "category": "الفئة",
+    "allCategories": "جميع الفئات",
+    "seller": "البائع",
+    "searchSeller": "البحث باسم البائع...",
+    "sortBy": "ترتيب حسب",
+    "trending": "الأكثر رواجاً",
+    "highestRated": "الأعلى تقييماً",
+    "priceLowHigh": "السعر: من الأقل للأعلى",
+    "priceHighLow": "السعر: من الأعلى للأقل"
+  },
+  "product": {
+    "bestSeller": "الأكثر مبيعاً",
+    "by": "من",
+    "addToCart": "أضف للسلة",
+    "add": "أضف",
+    "addedToCart": "أُضيف للسلة",
+    "addedToCartDesc": "تمت إضافته إلى سلة التسوق.",
+    "productNotFound": "المنتج غير موجود",
+    "backToMarketplace": "العودة للسوق",
+    "soldBy": "يُباع بواسطة",
+    "productDescription": "وصف المنتج",
+    "contactSeller": "تواصل مع البائع عبر واتساب",
+    "viewLocation": "عرض الموقع",
+    "shareProduct": "مشاركة المنتج",
+    "productLocation": "موقع المنتج",
+    "openInGoogleMaps": "فتح في خرائط جوجل",
+    "linkCopied": "تم نسخ الرابط!",
+    "linkCopiedDesc": "تم نسخ رابط المنتج إلى الحافظة."
+  },
+  "cart": {
+    "title": "سلة التسوق",
+    "empty": "سلة التسوق فارغة",
+    "emptyDesc": "أضف بعض المنتجات للبدء!",
+    "talkToSeller": "تحدث مع البائع",
+    "subtotal": "المجموع الفرعي",
+    "total": "المجموع",
+    "note": "ملاحظة: تواصل مع كل بائع بشكل فردي لترتيب الدفع والتوصيل."
+  },
+  "seller": {
+    "notFound": "البائع غير موجود",
+    "products": "منتج",
+    "contactSeller": "تواصل مع البائع",
+    "productsFromSeller": "منتجات هذا البائع"
+  },
+  "footer": {
+    "tagline": "بوابتك إلى المنتجات الأصلية من بلدك",
+    "quickLinks": "روابط سريعة",
+    "aboutUs": "من نحن",
+    "contact": "اتصل بنا",
+    "legal": "قانوني",
+    "terms": "شروط الخدمة",
+    "privacy": "سياسة الخصوصية",
+    "cookies": "سياسة ملفات تعريف الارتباط",
+    "followUs": "تابعنا",
+    "copyright": "جميع الحقوق محفوظة."
+  },
+  "notFound": {
+    "title": "404",
+    "message": "عذراً! الصفحة غير موجودة",
+    "returnHome": "العودة للرئيسية"
+  },
+  "languages": {
+    "en": "English",
+    "fr": "Français",
+    "ar": "العربية"
+  }
+}
