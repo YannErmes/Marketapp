@@ -1,11 +1,16 @@
-import { Star, MessageCircle } from "lucide-react";
+import { Star, ShoppingCart, Heart } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
+import { PlaceOrderModal } from "./PlaceOrderModal";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { Product } from "@/services/productsApi";
 import { useToast } from "@/hooks/use-toast";
+import Shimmer from "./Shimmer";
+import { useQueryClient } from "@tanstack/react-query";
+import { fetchProductById } from "@/services/productsApi";
+import favoritesService from "@/services/favorites";
 
 interface ProductCardProps {
   product: Product;
@@ -13,8 +18,22 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+  const [orderOpen, setOrderOpen] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [sellerImgLoaded, setSellerImgLoaded] = useState(false);
   const { t } = useTranslation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const handlePrefetch = () => {
+    import("../pages/ProductDetail").catch(() => {});
+    if (product.id) {
+      queryClient
+        .prefetchQuery(["product", product.id], () => fetchProductById(product.id), {
+          staleTime: 5 * 60 * 1000,
+        })
+        .catch(() => {});
+    }
+  };
   
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,13 +58,23 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   };
 
   return (
-    <Link to={`/product/${product.id}`}>
+    <Link
+      to={`/product/${product.id}`}
+      onMouseEnter={handlePrefetch}
+    >
       <Card className="product-card overflow-hidden h-full flex flex-col">
         <div className="relative aspect-square overflow-hidden bg-muted">
+          {!imgLoaded && (
+            <div className="absolute inset-0">
+              <Shimmer className="w-full h-full" />
+            </div>
+          )}
           <img
             src={product.product_image_url}
             alt={product.product_name}
-            className="object-cover w-full h-full transition-transform duration-300 hover:scale-105"
+            loading="lazy"
+            onLoad={() => setImgLoaded(true)}
+            className={`object-cover w-full h-full transition-transform duration-300 hover:scale-105 transition-opacity ease-in-out ${imgLoaded ? "opacity-100" : "opacity-0"}`}
           />
           {product.isBestSeller && (
             <div className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
@@ -67,11 +96,16 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           
           <div className="flex items-center gap-2 mb-1">
             {product.seller_image && (
-              <img 
-                src={product.seller_image} 
-                alt={product.seller_name}
-                className="w-4 h-4 md:w-5 md:h-5 rounded-full object-cover"
-              />
+              <div className="relative w-4 h-4 md:w-5 md:h-5 rounded-full overflow-hidden">
+                {!sellerImgLoaded && <Shimmer className="w-full h-full" />}
+                <img
+                  src={product.seller_image}
+                  alt={product.seller_name}
+                  loading="lazy"
+                  onLoad={() => setSellerImgLoaded(true)}
+                  className={`w-full h-full object-cover rounded-full ${sellerImgLoaded ? "opacity-100" : "opacity-0"}`}
+                />
+              </div>
             )}
             <Link 
               to={`/seller/${product.seller_name}`}
@@ -103,13 +137,14 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              // Always add to cart so cart reflects user actions even if parent doesn't pass a handler
-              import("@/services/cart").then((m) => {
-                m.default.addToCart(product, 1);
-              }).catch(() => {});
-
+              
+              // Use callback if provided, otherwise add directly
               if (onAddToCart) {
                 onAddToCart(product);
+              } else {
+                import("@/services/cart").then((m) => {
+                  m.default.addToCart(product, 1);
+                }).catch(() => {});
               }
 
               toast({ title: 'Added to cart', description: product.product_name });
@@ -122,12 +157,35 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           <Button 
             className="w-full btn-overlay text-xs md:text-sm"
             size="sm"
-            onClick={handleWhatsApp}
+            onClick={() => setOrderOpen(true)}
+            variant="secondary"
           >
-            <MessageCircle className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-            <span className="hidden sm:inline">{t('product.contactSeller')}</span>
-            <span className="sm:hidden">WhatsApp</span>
+            <ShoppingCart className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+            <span className="hidden sm:inline">Place Order</span>
+            <span className="sm:hidden">Order</span>
           </Button>
+
+          <Button 
+            className="w-full btn-overlay text-xs md:text-sm"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const added = !favoritesService.isFavorite(product.id);
+              if (added) favoritesService.addFavorite(product);
+              else favoritesService.removeFavorite(product.id);
+
+              // trigger update event and toast
+              window.dispatchEvent(new CustomEvent('favoritesUpdated'));
+              toast({ title: added ? 'Ajouté aux favoris' : 'Retiré des favoris', description: product.product_name });
+            }}
+          >
+            <Heart className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+            <span className="hidden sm:inline">{t('product.addToFavorites') || 'Ajouter aux favoris'}</span>
+            <span className="sm:hidden">Fav</span>
+          </Button>
+
+          <PlaceOrderModal open={orderOpen} onOpenChange={setOrderOpen} product={product} />
         </CardFooter>
       </Card>
     </Link>

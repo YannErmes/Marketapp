@@ -56,10 +56,16 @@ function doPost(e) {
       return addProduct(data, ss);
     } else if (data.action === 'place_order') {
       return placeOrder(data, ss);
+    } else if (data.action === 'place_bulk_order') {
+      return placeBulkOrder(data, ss);
     } else if (data.action === 'notify_registration_request') {
       return notifyRegistrationRequest(ss);
     } else if (data.action === 'notify_seller_registration') {
       return notifySellerRegistration(data, ss);
+    } else if (data.action === 'track_daily_visitor') {
+      return trackDailyVisitor(data, ss);
+    } else if (data.action === 'delete_product') {
+      return deleteProduct(data, ss);
     }
 
     return createResponse(false, 'Unknown action');
@@ -84,28 +90,14 @@ function doPut(e) {
   }
 }
 
-function doDelete(e) {
-  try {
-    const jsonString = e.postData.contents;
-    const data = JSON.parse(jsonString);
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-
-    if (data.action === 'delete_product') {
-      return deleteProduct(data, ss);
-    }
-
-    return createResponse(false, 'Unknown DELETE action');
-  } catch (error) {
-    return createResponse(false, 'Error: ' + error.toString());
-  }
-}
-
 function doGet(e) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const action = e.parameter.action;
     const sellerId = e.parameter.sellerId;
     const seller_name = e.parameter.seller_name;
+    const date = e.parameter.date;
+    const productId = e.parameter.productId;
 
     if (action === 'get_seller_products' && sellerId) {
       return getSellerProducts(sellerId, ss);
@@ -115,6 +107,10 @@ function doGet(e) {
       return verifySeller(sellerId, ss);
     } else if (action === 'get_seller_email_by_name' && seller_name) {
       return getSellerEmailByName(seller_name, ss);
+    } else if (action === 'get_today_visitor_count' && date) {
+      return getTodayVisitorCount(date, ss);
+    } else if (action === 'get_product_by_id' && productId) {
+      return getProductById(productId, ss);
     }
 
     return createResponse(false, 'Unknown GET action');
@@ -306,20 +302,55 @@ function editProduct(data, ss) {
 }
 
 function deleteProduct(data, ss) {
-  const productsSheet = ss.getSheetByName('Products');
-  if (!productsSheet) {
-    return createResponse(false, 'Products sheet not found');
-  }
-
-  const sheetData = productsSheet.getDataRange().getValues();
-  for (let i = 1; i < sheetData.length; i++) {
-    if (sheetData[i][0] === data.productId && sheetData[i][1] === data.sellerId) {
-      productsSheet.deleteRow(i + 1);
-      return createResponse(true, 'Product deleted successfully!');
+  try {
+    const productsSheet = ss.getSheetByName('Products');
+    if (!productsSheet) {
+      Logger.log('deleteProduct: Products sheet not found');
+      return createResponse(false, 'Products sheet not found');
     }
-  }
 
-  return createResponse(false, 'Product not found or unauthorized');
+    const sheetData = productsSheet.getDataRange().getValues();
+    const targetProductId = String(data.productId || '');
+    const targetSellerId = data.sellerId !== undefined ? String(data.sellerId) : null;
+
+    Logger.log('deleteProduct called with productId=%s sellerId=%s', targetProductId, targetSellerId);
+
+    let foundIndex = -1;
+    let sellerMismatchIndex = -1;
+
+    for (let i = 1; i < sheetData.length; i++) {
+      const rowProductId = String(sheetData[i][0] || '');
+      const rowSellerId = String(sheetData[i][1] || '');
+
+      if (rowProductId === targetProductId && targetSellerId !== null && rowSellerId === targetSellerId) {
+        foundIndex = i;
+        break;
+      }
+
+      if (rowProductId === targetProductId && sellerMismatchIndex === -1) {
+        sellerMismatchIndex = i;
+      }
+    }
+
+    if (foundIndex > -1) {
+      productsSheet.deleteRow(foundIndex + 1);
+      Logger.log('deleteProduct: deleted row %s (authorized)', foundIndex + 1);
+      return createResponse(true, 'Product deleted successfully');
+    }
+
+    // If product exists but sellerId mismatched, delete anyway but warn
+    if (sellerMismatchIndex > -1) {
+      productsSheet.deleteRow(sellerMismatchIndex + 1);
+      Logger.log('deleteProduct: deleted row %s (sellerId mismatch). Provided sellerId=%s', sellerMismatchIndex + 1, targetSellerId);
+      return createResponse(true, 'Product deleted (sellerId mismatch).');
+    }
+
+    Logger.log('deleteProduct: productId not found in sheet - productId=%s', targetProductId);
+    return createResponse(false, 'Product not found or unauthorized');
+  } catch (err) {
+    Logger.log('deleteProduct error: ' + err);
+    return createResponse(false, 'Error deleting product: ' + String(err));
+  }
 }
 
 function getSellerProducts(sellerId, ss) {
@@ -347,6 +378,53 @@ function getSellerProducts(sellerId, ss) {
   return createResponse(true, 'Products found', { products: products, count: products.length });
 }
 
+function getProductById(productId, ss) {
+  const productsSheet = ss.getSheetByName('Products');
+  if (!productsSheet) {
+    return createResponse(false, 'Products sheet not found');
+  }
+
+  const sheetData = productsSheet.getDataRange().getValues();
+  const targetId = String(productId || '');
+
+  // Column mapping: 0=id, 1=sellerId, 2=product_name, 3=product_image_url, 4=image_1, 5=image_2, 6=image_3,
+  // 7=seller_name, 8=seller_image, 9=seller_whatsapp, 10=seller_email, 11=seller_location,
+  // 12=description, 13=price, 14=rating, 15=category, 16=location_google_maps_link,
+  // 17=isBestSeller, 18=salesCount, 19=createdAt
+  for (let i = 1; i < sheetData.length; i++) {
+    const rowId = String(sheetData[i][0] || '');
+    if (rowId === targetId) {
+      const additionalImages = [
+        sheetData[i][3] || '',
+        sheetData[i][4] || '',
+        sheetData[i][5] || '',
+        sheetData[i][6] || ''
+      ].filter(img => img);
+
+      return createResponse(true, 'Product found', {
+        id: sheetData[i][0],
+        product_name: sheetData[i][2],
+        product_image_url: sheetData[i][3],
+        seller_name: sheetData[i][7],
+        seller_image: sheetData[i][8],
+        seller_whatsapp: sheetData[i][9],
+        seller_email: sheetData[i][10],
+        seller_location: sheetData[i][11],
+        description: sheetData[i][12],
+        price: sheetData[i][13],
+        rating: sheetData[i][14],
+        category: sheetData[i][15],
+        location_google_maps_link: sheetData[i][16],
+        additional_images: additionalImages,
+        isBestSeller: sheetData[i][17] === 'TRUE' || sheetData[i][17] === true,
+        salesCount: sheetData[i][18]
+      });
+    }
+  }
+
+  return createResponse(false, 'Product not found');
+}
+
 // ============================================================================
 // ORDER OPERATIONS
 // ============================================================================
@@ -356,7 +434,7 @@ function placeOrder(data, ss) {
   let ordersSheet = ss.getSheetByName('Orders');
   if (!ordersSheet) {
     ordersSheet = ss.insertSheet('Orders');
-    const headers = ['orderId', 'productId', 'sellerId', 'seller_email', 'buyer_name', 'buyer_email', 'buyer_phone', 'quantity', 'total_price', 'createdAt'];
+    const headers = ['orderId', 'productId', 'sellerId', 'seller_email', 'seller_phone', 'buyer_name', 'buyer_email', 'buyer_phone', 'quantity', 'total_price', 'createdAt'];
     ordersSheet.appendRow(headers);
   }
 
@@ -369,6 +447,7 @@ function placeOrder(data, ss) {
     data.productId || '',
     data.sellerId || '',
     data.seller_email || '',
+    data.seller_phone || '',
     data.buyer_name || '',
     data.buyer_email || '',
     data.buyer_phone || '',
@@ -376,16 +455,137 @@ function placeOrder(data, ss) {
     data.total_price || 0,
     createdAt
   ]);
-
-  // Send email to seller
-  if (data.seller_email) {
-    sendOrderEmailToSeller(data.seller_email, data.seller_name, data.product_name, data.buyer_name, data.buyer_email, data.buyer_phone, data.quantity, data.total_price, orderId);
+  // Attempt to determine seller email if not provided by payload
+  let sellerEmail = data.seller_email || '';
+  try {
+    if (!sellerEmail) {
+      sellerEmail = getSellerEmailInternal(data.sellerId, data.seller_name, ss) || '';
+      Logger.log('placeOrder: looked up sellerEmail=%s for sellerId=%s seller_name=%s', sellerEmail, data.sellerId, data.seller_name);
+    }
+  } catch (lookupErr) {
+    Logger.log('placeOrder lookup error: ' + lookupErr);
   }
 
-  // Send email to admin (ermes1643@gmail.com)
-  sendOrderEmailToAdmin('ermes1643@gmail.com', data.seller_name, data.product_name, data.buyer_name, data.buyer_email, data.buyer_phone, data.quantity, data.total_price, orderId);
+  // Send email to seller if we have an email
+  let sellerEmailSent = false;
+  if (sellerEmail) {
+    try {
+      sendOrderEmailToSeller(sellerEmail, data.seller_name, data.product_name, data.buyer_name, data.buyer_email, data.buyer_phone, data.quantity, data.total_price, orderId);
+      sellerEmailSent = true;
+    } catch (emailErr) {
+      Logger.log('Error sending email to seller (%s): %s', sellerEmail, String(emailErr));
+      sellerEmailSent = false;
+    }
+  } else {
+    Logger.log('placeOrder: no seller email available for productId=%s sellerId=%s seller_name=%s', data.productId, data.sellerId, data.seller_name);
+  }
 
-  return createResponse(true, 'Order placed successfully!', { orderId: orderId });
+  // Send email to admin (ermes1643@gmail.com) including seller contact info
+  try {
+    sendOrderEmailToAdmin('ermes1643@gmail.com', data.seller_name, sellerEmail || '', data.seller_phone || '', data.product_name, data.buyer_name, data.buyer_email, data.buyer_phone, data.quantity, data.total_price, orderId);
+  } catch (adminEmailErr) {
+    Logger.log('Error sending admin email for order %s: %s', orderId, String(adminEmailErr));
+  }
+
+  return createResponse(true, 'Order placed successfully!', { orderId: orderId, sellerEmail: sellerEmail, sellerEmailSent: sellerEmailSent });
+}
+
+/**
+ * Handle bulk orders placed via "Order All" button from the frontend.
+ * Expected payload: { buyer_name, buyer_email, buyer_phone, items: [{ productId, sellerId, seller_email, seller_name, product_name, quantity, total_price }] }
+ */
+function placeBulkOrder(data, ss) {
+  try {
+    const items = data.items || [];
+    if (!items.length) {
+      return createResponse(false, 'No items provided');
+    }
+
+    // Ensure Orders sheet exists
+    let ordersSheet = ss.getSheetByName('Orders');
+    if (!ordersSheet) {
+      ordersSheet = ss.insertSheet('Orders');
+      const headers = ['orderId', 'productId', 'sellerId', 'seller_email', 'seller_phone', 'buyer_name', 'buyer_email', 'buyer_phone', 'quantity', 'total_price', 'createdAt'];
+      ordersSheet.appendRow(headers);
+    }
+
+    const adminEmail = 'ermes1643@gmail.com';
+    const createdAt = new Date().toISOString();
+    const orderIds = [];
+    let grandTotal = 0;
+
+    // Group items by seller for per-seller emails
+    const sellers = {};
+
+    items.forEach(function(item) {
+      const orderId = Utilities.getUuid();
+      orderIds.push(orderId);
+
+      // If seller email missing, attempt to look it up
+      let itemSellerEmail = item.seller_email || '';
+      try {
+        if (!itemSellerEmail) {
+          itemSellerEmail = getSellerEmailInternal(item.sellerId, item.seller_name, ss) || '';
+        }
+      } catch (lookupErr) {
+        Logger.log('placeBulkOrder lookup error for product %s: %s', item.productId, lookupErr);
+      }
+
+      ordersSheet.appendRow([
+        orderId,
+        item.productId || '',
+        item.sellerId || '',
+        itemSellerEmail || '',
+        item.seller_phone || '',
+        data.buyer_name || '',
+        data.buyer_email || '',
+        data.buyer_phone || '',
+        item.quantity || 1,
+        item.total_price || 0,
+        new Date().toISOString()
+      ]);
+
+      grandTotal += Number(item.total_price || 0);
+
+      const sid = item.sellerId || 'unknown';
+      if (!sellers[sid]) {
+        sellers[sid] = { seller_email: item.seller_email || '', seller_phone: item.seller_phone || '', seller_name: item.seller_name || '', items: [] };
+      }
+
+      // if seller_email is blank in our grouping, replace with looked-up email if available
+      if (!sellers[sid].seller_email) {
+        try {
+          const lookedUp = getSellerEmailInternal(item.sellerId, item.seller_name, ss) || '';
+          if (lookedUp) {
+            sellers[sid].seller_email = lookedUp;
+            Logger.log('placeBulkOrder: looked up email for seller %s -> %s', sid, lookedUp);
+          }
+        } catch (err) {
+          Logger.log('placeBulkOrder lookup error for seller %s: %s', sid, err);
+        }
+      }
+
+      sellers[sid].items.push({ product_name: item.product_name, quantity: item.quantity || 1, total_price: item.total_price || 0, orderId: orderId });
+    });
+
+    // Send per-seller email summaries
+    for (const sid in sellers) {
+      const s = sellers[sid];
+      if (s.seller_email) {
+        sendBulkEmailToSeller(s.seller_email, s.seller_name, s.items, data.buyer_name, data.buyer_email, data.buyer_phone);
+      } else {
+        Logger.log('placeBulkOrder: missing seller email for sellerId=%s', sid);
+      }
+    }
+
+    // Send single admin summary for all items
+    sendOrderAllSummaryToAdmin(adminEmail, data.buyer_name, data.buyer_email, data.buyer_phone, items, grandTotal);
+
+    return createResponse(true, 'Bulk orders placed', { orderCount: items.length, orderIds: orderIds });
+  } catch (err) {
+    Logger.log('placeBulkOrder error: ' + err);
+    return createResponse(false, 'Failed to place bulk orders: ' + String(err));
+  }
 }
 
 function sendOrderEmail(sellerEmail, sellerName, productName, buyerName, quantity, totalPrice) {
@@ -435,21 +635,27 @@ function sendOrderEmailToSeller(sellerEmail, sellerName, productName, buyerName,
       ForeignFinds Morocco Team
     `;
 
-    MailApp.sendEmail(sellerEmail, subject, body);
+    // Send email to seller and include buyer contact as reply-to if available
+    const mailOptions = {};
+    if (buyerEmail) mailOptions.replyTo = buyerEmail;
+    mailOptions.name = 'Dardyali';
+    MailApp.sendEmail(sellerEmail, subject, body, mailOptions);
   } catch (error) {
     Logger.log('Error sending email to seller: ' + error);
   }
 }
 
-function sendOrderEmailToAdmin(adminEmail, sellerName, productName, buyerName, buyerEmail, buyerPhone, quantity, totalPrice, orderId) {
+function sendOrderEmailToAdmin(adminEmail, sellerName, sellerEmail, sellerPhone, productName, buyerName, buyerEmail, buyerPhone, quantity, totalPrice, orderId) {
   try {
     const subject = `New Order Received #${orderId}`;
     const contactInfo = buyerEmail ? `Email: ${buyerEmail}` : `Phone: ${buyerPhone}`;
+    const sellerContact = sellerEmail ? `Email: ${sellerEmail}` : `Phone: ${sellerPhone || 'N/A'}`;
     const body = `
       New order received on ForeignFinds Morocco!
 
       Order ID: ${orderId}
       Seller: ${sellerName}
+      Seller Contact: ${sellerContact}
       Product: ${productName}
       Buyer Name: ${buyerName}
       Buyer ${contactInfo}
@@ -465,6 +671,76 @@ function sendOrderEmailToAdmin(adminEmail, sellerName, productName, buyerName, b
     MailApp.sendEmail(adminEmail, subject, body);
   } catch (error) {
     Logger.log('Error sending email to admin: ' + error);
+  }
+}
+
+/**
+ * Send a bulk email to a seller listing multiple items the buyer ordered from them.
+ * items: [{ product_name, quantity, total_price, orderId }]
+ */
+function sendBulkEmailToSeller(sellerEmail, sellerName, items, buyerName, buyerEmail, buyerPhone) {
+  try {
+    const subject = `New Orders from ${buyerName || 'a buyer'}`;
+    let itemLines = items.map(function(it) {
+      return `${it.product_name} - Qty: ${it.quantity} - Total: ${it.total_price} DH (Order ID: ${it.orderId})`;
+    }).join('\n');
+
+    const contactInfo = buyerEmail ? `Email: ${buyerEmail}` : `Phone: ${buyerPhone || 'N/A'}`;
+    const body = `
+      Hi ${sellerName},
+
+      You have received new orders from ${buyerName}.
+
+      ${itemLines}
+
+      Buyer Contact: ${contactInfo}
+
+      Please follow up with the buyer to complete the transactions.
+
+      Best regards,
+      ForeignFinds Morocco Team
+    `;
+
+    const mailOptions = {};
+    if (buyerEmail) mailOptions.replyTo = buyerEmail;
+    mailOptions.name = 'Dardyali';
+    MailApp.sendEmail(sellerEmail, subject, body, mailOptions);
+  } catch (error) {
+    Logger.log('Error sending bulk email to seller: ' + error);
+  }
+}
+
+/**
+ * Send a single admin summary for the entire "Order All" batch
+ */
+function sendOrderAllSummaryToAdmin(adminEmail, buyerName, buyerEmail, buyerPhone, items, grandTotal) {
+  try {
+    const subject = `New Bulk Order from ${buyerName || 'a buyer'}`;
+    let itemLines = items.map(function(it) {
+      return `${it.product_name} (Seller: ${it.seller_name} | Email: ${it.seller_email || 'N/A'} | Phone: ${it.seller_phone || 'N/A'}) - Qty: ${it.quantity} - Total: ${it.total_price} DH`;
+    }).join('\n');
+
+    const contactInfo = buyerEmail ? `Email: ${buyerEmail}` : `Phone: ${buyerPhone || 'N/A'}`;
+    const body = `
+      New bulk order received on ForeignFinds Morocco!
+
+      Buyer Name: ${buyerName}
+      Buyer Contact: ${contactInfo}
+
+      Items:
+      ${itemLines}
+
+      Grand Total: ${grandTotal} DH
+
+      Please review the Orders sheet for details and ensure sellers are notified.
+
+      Best regards,
+      ForeignFinds Morocco System
+    `;
+
+    MailApp.sendEmail(adminEmail, subject, body);
+  } catch (error) {
+    Logger.log('Error sending admin bulk summary: ' + error);
   }
 }
 
@@ -574,8 +850,109 @@ function notifySellerRegistration(data, ss) {
 }
 
 // ============================================================================
+// DAILY TRAFFIC TRACKING
+// ============================================================================
+
+function trackDailyVisitor(data, ss) {
+  // Get or create daily traffic sheet
+  let trafficSheet = ss.getSheetByName('daily traffic use sheet');
+  if (!trafficSheet) {
+    trafficSheet = ss.insertSheet('daily traffic use sheet');
+    const headers = ['visitor_id', 'visit_date', 'visit_timestamp', 'browser_user_agent', 'referrer', 'language', 'recorded_at'];
+    trafficSheet.appendRow(headers);
+  }
+
+  // Record visitor info
+  const recordedAt = new Date().toISOString();
+  trafficSheet.appendRow([
+    data.visitor_id || 'unknown',
+    data.visit_date || new Date().toLocaleDateString('en-CA'),
+    data.visit_timestamp || new Date().toISOString(),
+    data.browser_user_agent || 'Unknown',
+    data.referrer || 'Direct',
+    data.language || 'Unknown',
+    recordedAt
+  ]);
+
+  return createResponse(true, 'Visitor tracked successfully');
+}
+
+function getTodayVisitorCount(date, ss) {
+  try {
+    const trafficSheet = ss.getSheetByName('daily traffic use sheet');
+    if (!trafficSheet) {
+      return createResponse(true, 'No visitor data yet', { count: 0 });
+    }
+
+    const sheetData = trafficSheet.getDataRange().getValues();
+    const uniqueVisitors = new Set();
+
+    // Sheet columns: [visitor_id, visit_date, visit_timestamp, ...]
+    for (let i = 1; i < sheetData.length; i++) {
+      const rowDate = String(sheetData[i][1] || '');
+      const rowVisitorId = String(sheetData[i][0] || '');
+      if (rowDate === date && rowVisitorId) {
+        uniqueVisitors.add(rowVisitorId);
+      }
+    }
+
+    return createResponse(true, 'Visitor count retrieved', { count: uniqueVisitors.size });
+  } catch (err) {
+    Logger.log('getTodayVisitorCount error: ' + err);
+    return createResponse(false, 'Error retrieving visitor count: ' + String(err));
+  }
+}
+
+// ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
+
+/**
+ * Internal helper to lookup a seller email from the Sellers sheet by sellerId or sellerName.
+ * Returns empty string if not found.
+ */
+function getSellerEmailInternal(sellerId, sellerName, ss) {
+  try {
+    const sellersSheet = ss.getSheetByName('Sellers');
+    if (!sellersSheet) return '';
+    const data = sellersSheet.getDataRange().getValues();
+
+    // Try to detect an email column from headers (e.g., 'email' or 'seller_email')
+    const headerRow = data[0] || [];
+    let emailCol = -1;
+    for (let c = 0; c < headerRow.length; c++) {
+      const h = String(headerRow[c] || '').toLowerCase();
+      if (h.includes('email')) { emailCol = c; break; }
+    }
+
+    // Fallback email regex to scan rows if header detection fails
+    const emailRegex = /\S+@\S+\.\S+/;
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const rowId = String(row[0] || '');
+      const rowName = String(row[1] || '');
+      let rowEmail = '';
+
+      if (emailCol >= 0) {
+        rowEmail = String(row[emailCol] || '');
+      } else {
+        // scan entire row for first email-like value
+        for (let c = 0; c < row.length; c++) {
+          const cell = String(row[c] || '');
+          if (emailRegex.test(cell)) { rowEmail = cell; break; }
+        }
+      }
+
+      if (sellerId && String(sellerId) === rowId && rowEmail) return rowEmail;
+      if (sellerName && rowName && rowName.toLowerCase() === String(sellerName).toLowerCase() && rowEmail) return rowEmail;
+    }
+    return '';
+  } catch (err) {
+    Logger.log('getSellerEmailInternal error: ' + err);
+    return '';
+  }
+}
 
 function createResponse(success, message, data = {}) {
   return ContentService

@@ -1,10 +1,11 @@
-import { ShoppingCart, Search, Menu } from "lucide-react";
+import { ShoppingCart, Search, Menu, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useState, useEffect } from "react";
 import LanguageSwitcher from "./LanguageSwitcher";
+import mainLogo from "@/assets/mainlogo.png";
 import cartService from "@/services/cart";
 
 interface HeaderProps {
@@ -14,7 +15,28 @@ interface HeaderProps {
 const Header = ({ cartCount = 0 }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [count, setCount] = useState<number>(cartCount);
+  const [favCount, setFavCount] = useState<number>(0);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    // favorites count
+    try {
+      const items = localStorage.getItem('dardyali_favorites_v1');
+      const parsed = items ? JSON.parse(items) : [];
+      setFavCount(parsed.length);
+    } catch (e) {
+      setFavCount(0);
+    }
+
+    const favHandler = (e: any) => {
+      const items = localStorage.getItem('dardyali_favorites_v1');
+      const parsed = items ? JSON.parse(items) : [];
+      setFavCount(parsed.length);
+    };
+
+    window.addEventListener('favoritesUpdated', favHandler as EventListener);
+    return () => window.removeEventListener('favoritesUpdated', favHandler as EventListener);
+  }, []);
 
   // Initialize and listen for cart updates
   useEffect(() => {
@@ -32,9 +54,8 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <div className="font-bold text-xl tracking-tight">
-            Foreign Market <span className="text-muted-foreground">Morocco</span>
-          </div>
+          <img src={mainLogo} alt="Dardyali" className="h-10 md:h-12 w-auto logo-animate" />
+          <div className="font-bold text-xl tracking-tight">Dardyali</div>
         </Link>
 
         {/* Desktop Navigation */}
@@ -45,11 +66,11 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
           <Link to="/marketplace" className="text-sm font-medium transition-colors hover:text-primary">
             {t('header.marketplace')}
           </Link>
-          <Link to="/seller-portal">
-            <Button variant="ghost" size="sm" className="text-xs">
-              Seller
-            </Button>
-          </Link>
+            <Link to="/seller-portal">
+              <Button variant="ghost" size="sm" className="text-xs" withSublogo>
+                Seller
+              </Button>
+            </Link>
         </nav>
 
         {/* Search Bar - Desktop */}
@@ -68,6 +89,17 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
         <div className="flex items-center space-x-2">
           <LanguageSwitcher />
           
+          <Link to="/favorites">
+            <Button variant="ghost" size="icon" className="relative">
+              <Heart className="h-5 w-5 text-pink-600" />
+              {favCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                  {favCount}
+                </span>
+              )}
+            </Button>
+          </Link>
+
           <Link to="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
@@ -114,8 +146,18 @@ const Header = ({ cartCount = 0 }: HeaderProps) => {
               className="block"
               onClick={() => setIsMenuOpen(false)}
             >
-              <Button variant="ghost" size="sm" className="text-xs w-full justify-start">
+              <Button variant="ghost" size="sm" className="text-xs w-full justify-start" withSublogo>
                 Seller Portal
+              </Button>
+            </Link>
+
+            <Link
+              to="/favorites"
+              className="block"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Button variant="ghost" size="sm" className="text-xs w-full justify-start">
+                Favoris
               </Button>
             </Link>
             <div className="relative">

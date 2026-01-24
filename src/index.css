@@ -212,4 +212,26 @@ All colors MUST be HSL.
   .btn-overlay:hover::before {
     left: 0;
   }
+
+  /* Logo animations */
+  .logo-animate {
+    animation: floatLogo 3.5s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  @keyframes floatLogo {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-4px) rotate(-2deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+
+  .sublogo-icon {
+    animation: pulseSublogo 2.8s ease-in-out infinite;
+  }
+
+  @keyframes pulseSublogo {
+    0% { transform: scale(1); opacity: 0.95; }
+    50% { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.95; }
+  }
 }

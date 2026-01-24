@@ -1,4 +1,4 @@
-const API_URL = (import.meta.env && import.meta.env.VITE_APPS_SCRIPT_URL) || "https://script.google.com/macros/s/AKfycbzZlBdqUw93IrfngbB_0ZfhEFDQsPkIRPItn9Oq35T4ExEvjBT2keJw6kH2Qe6uvnSYog/exec";
+const API_URL = (import.meta.env && import.meta.env.VITE_APPS_SCRIPT_URL) || "https://script.google.com/macros/s/AKfycbyXoc4rYMlSl5SRAlBLhrKl-ZF6qVwvIeBNu1CNOPZwjPEhgVhmqULQY2iJGaDfeMRbLA/exec";
 
 // If you want the app to pull directly from a Google Sheet, set VITE_SHEET_ID in your
 // environment (.env) to the spreadsheet ID. The code will then fetch the GViz JSON
@@ -43,6 +43,7 @@ export interface ApiProduct {
   id: string;
   product_name: string;
   product_image_url: string;
+  seller_email?: string;
   image_1?: string;
   image_2?: string;
   image_3?: string;
@@ -63,6 +64,7 @@ export interface Product {
   id: string;
   product_name: string;
   product_image_url: string;
+  seller_email?: string;
   seller_name: string;
   seller_image?: string;
   seller_whatsapp: string;
@@ -102,6 +104,7 @@ const transformProduct = (apiProduct: ApiProduct): Product => {
     id: apiProduct.id || String(Math.random()),
     product_name: apiProduct.product_name || "Unknown Product",
     product_image_url: apiProduct.product_image_url || apiProduct.image_1 || "",
+    seller_email: apiProduct.seller_email || '',
     seller_name: apiProduct.seller_name || "Unknown Seller",
     seller_image: apiProduct.seller_image,
     seller_whatsapp: apiProduct.seller_whatsapp || "",
@@ -187,8 +190,32 @@ export const fetchProducts = async (sellerName?: string): Promise<{
 };
 
 export const fetchProductById = async (id: string): Promise<Product | null> => {
-  const { products } = await fetchProducts();
-  return products.find((p) => p.id === id) || null;
+  try {
+    // Fetch directly from Apps Script to get full product data from the sheet
+    const url = `${API_URL}?action=get_product_by_id&productId=${encodeURIComponent(id)}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch product: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    
+    if (result.success && result.id) {
+      return transformProduct(result as ApiProduct);
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    // Fallback to fetching all products and searching (for offline/error scenarios)
+    try {
+      const { products } = await fetchProducts();
+      return products.find((p) => p.id === id) || null;
+    } catch {
+      return null;
+    }
+  }
 };
 
 // Extract unique categories from products

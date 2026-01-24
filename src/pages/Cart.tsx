@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { mockProducts, Product } from "@/data/mockProducts";
 import cartService from "@/services/cart";
+import OrderAllModal from '@/components/OrderAllModal';
 import { useToast } from "@/hooks/use-toast";
 
 interface CartItem extends Product {
@@ -18,6 +19,7 @@ const Cart = () => {
   
   // Load cart from localStorage
   const [cartItems, setCartItems] = useState<CartItem[]>(() => cartService.getCart());
+  const [orderAllOpen, setOrderAllOpen] = useState(false);
 
   // Listen for cart updates from other pages/components
   useEffect(() => {
@@ -163,9 +165,16 @@ const Cart = () => {
               <p className="text-sm text-muted-foreground">
                 {t('cart.note')}
               </p>
+
+              <div className="flex gap-3 mt-4">
+                <Button onClick={() => setOrderAllOpen(true)} className="flex-1">{t('cart.orderAll') || 'Order All'}</Button>
+                <Link to="/marketplace"><Button variant="outline">{t('cart.continue') || 'Continue Shopping'}</Button></Link>
+              </div>
             </div>
           </CardContent>
         </Card>
+
+        <OrderAllModal open={orderAllOpen} onOpenChange={setOrderAllOpen} />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Product } from '@/services/productsApi';
-import { placeOrder, getSellerEmailByName } from '@/services/sellerApi';
+import { placeOrder } from '@/services/sellerApi';
 
 interface PlaceOrderModalProps {
   open: boolean;
@@ -70,13 +70,11 @@ export function PlaceOrderModal({ open, onOpenChange, product }: PlaceOrderModal
     try {
       const totalPrice = product.price * formData.quantity;
       
-      // Get seller email by name
-      const sellerEmail = await getSellerEmailByName(product.seller_name);
-      
       await placeOrder({
         productId: product.id,
         sellerId: product.id.split('-')[0], // Extract seller ID if available
-        seller_email: sellerEmail || '', // Use fetched email
+        seller_email: (product as any).seller_email || '', // Use seller_email from product when available
+        seller_phone: product.seller_whatsapp || '',
         seller_name: product.seller_name,
         product_name: product.product_name,
         buyer_name: formData.buyer_name,

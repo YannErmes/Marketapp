@@ -6,7 +6,7 @@
   },
   "home": {
     "welcome": "Bienvenue sur",
-    "brandName": "Foreign Market",
+    "brandName": "Dardyali",
     "tagline": "Votre passerelle vers des produits authentiques de chez vous",
     "browseMarketplace": "Parcourir le Marché",
     "tasteOfHome": "Un Goût de Chez Soi, Où Que Vous Soyez",
@@ -56,6 +56,7 @@
     "soldBy": "Vendu par",
     "productDescription": "Description du Produit",
     "contactSeller": "Contacter le Vendeur sur WhatsApp",
+    "addToFavorites": "Ajouter aux favoris",
     "viewLocation": "Voir l'Emplacement",
     "shareProduct": "Partager le Produit",
     "productLocation": "Emplacement du Produit",
@@ -87,6 +88,7 @@
     "terms": "Conditions d'Utilisation",
     "privacy": "Politique de Confidentialité",
     "cookies": "Politique des Cookies",
+    "note": "Note",
     "followUs": "Suivez-nous",
     "copyright": "Tous droits réservés."
   },

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
 import CultureSection from "@/components/CultureSection";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import Shimmer from "@/components/Shimmer";
 import ErrorMessage from "@/components/ErrorMessage";
 import { useProducts, Product } from "@/hooks/useProducts";
 import { useToast } from "@/hooks/use-toast";
@@ -36,7 +36,7 @@ const Home = () => {
       {/* Hero Section */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden fade-bg">
         <div className="absolute inset-0">
-          <img src={heroImage} alt="Foreign Market Morocco - Moroccan Market Scene" className="w-full h-full object-cover" />
+          <img src={heroImage} alt="Dardyali - Marketplace" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/60 to-background" />
         </div>
         <div className="container relative z-10 text-center space-y-6 px-4">
@@ -47,8 +47,8 @@ const Home = () => {
             {t('home.tagline')}
           </p>
           <div className="flex gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <Link to="/marketplace">
-              <Button size="lg" className="btn-overlay">
+              <Link to="/marketplace">
+              <Button size="lg" className="btn-overlay" withSublogo>
                 {t('home.browseMarketplace')}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -87,7 +87,13 @@ const Home = () => {
           </div>
           
           {isLoading ? (
-            <LoadingSpinner text={t('marketplace.loading')} />
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="rounded-lg overflow-hidden bg-muted">
+                  <Shimmer className="w-full h-56" />
+                </div>
+              ))}
+            </div>
           ) : isError ? (
             <ErrorMessage 
               message={error?.message || t('marketplace.errorLoading')} 
@@ -118,7 +124,7 @@ const Home = () => {
             {t('home.readyToExploreDesc')}
           </p>
           <Link to="/marketplace">
-            <Button size="lg" variant="secondary" className="btn-overlay">
+            <Button size="lg" variant="secondary" className="btn-overlay" withSublogo>
               {t('home.startShopping')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

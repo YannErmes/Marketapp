@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Star, ChevronLeft, MessageCircle, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/components/ProductCard";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import Shimmer from "@/components/Shimmer";
 import ErrorMessage from "@/components/ErrorMessage";
 import { useProducts, Product } from "@/hooks/useProducts";
 import { useToast } from "@/hooks/use-toast";
@@ -24,8 +24,29 @@ const SellerProfile = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" text={t('seller.loading')} />
+      <div className="min-h-screen">
+        <div className="container px-4 py-8">
+          <div className="bg-card border rounded-lg p-8 mb-12">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <div className="w-24 h-24 rounded-full overflow-hidden">
+                <Shimmer className="w-full h-full" />
+              </div>
+              <div className="flex-1 text-center md:text-left space-y-3">
+                <Shimmer className="h-6 w-1/3 rounded-md" />
+                <Shimmer className="h-4 w-1/4 rounded-md" />
+                <Shimmer className="h-8 w-40 rounded-md" />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-lg overflow-hidden bg-muted">
+                <Shimmer className="w-full h-40" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -64,7 +85,7 @@ const SellerProfile = () => {
 
   const handleContactSeller = () => {
     const message = encodeURIComponent(
-      `Hi! I'd like to know more about your products on Foreign Market Morocco.`
+      `Hi! I'd like to know more about your products on Dardyali.`
     );
     const whatsappNumber = seller.seller_whatsapp.replace(/[^0-9]/g, '');
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");

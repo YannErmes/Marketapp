@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import ProductCard from "@/components/ProductCard";
 import FilterBar from "@/components/FilterBar";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import Shimmer from "@/components/Shimmer";
 import ErrorMessage from "@/components/ErrorMessage";
 import StatsBar from "@/components/StatsBar";
 import { useProducts, Product } from "@/hooks/useProducts";
@@ -90,7 +90,24 @@ const Marketplace = () => {
 
       <div className="container px-4 py-12">
         {isLoading ? (
-          <LoadingSpinner size="lg" text={t('marketplace.loading')} />
+          <div className="space-y-6">
+            <div className="mb-6">
+              <Shimmer className="h-8 w-1/3 rounded-md" />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <div className="col-span-4">
+                <Shimmer className="h-10 w-full rounded-md mb-4" />
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="rounded-lg overflow-hidden bg-muted">
+                      <Shimmer className="w-full h-40" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         ) : isError ? (
           <ErrorMessage 
             message={error?.message || t('marketplace.errorLoading')} 

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle2, Edit, Trash2, Plus } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { AlertCircle, CheckCircle2, Trash2, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { getSellerProducts, deleteProduct, clearSellerSession, SellerProduct, SellerData } from "@/services/sellerApi";
 import { saveSellerInfo } from "@/services/addProductApi";
 
@@ -75,10 +75,7 @@ export const SellerDashboard = ({ sellerId, sellerInfo, onLogout }: SellerDashbo
 
         {/* Seller Info Card */}
         <Card className="mb-8 border-blue-200 bg-blue-50">
-          <CardHeader>
-            <CardTitle>Your Profile</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-gray-600">Seller ID</p>
@@ -180,26 +177,15 @@ export const SellerDashboard = ({ sellerId, sellerInfo, onLogout }: SellerDashbo
                     <p className="text-lg font-bold text-primary">{product.price} DH</p>
                     <p className="text-sm text-gray-600">Sales: {product.salesCount}</p>
                   </CardContent>
-                  <div className="px-4 pb-4 flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                      asChild
-                    >
-                      <Link to={`/seller/product/${product.id}`}>
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Link>
-                    </Button>
+                  <div className="px-4 pb-4">
                     <Button
                       variant="destructive"
                       size="sm"
-                      className="flex-1"
+                      className="w-full"
                       onClick={() => handleDelete(product.id)}
                     >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Product
                     </Button>
                   </div>
                 </Card>

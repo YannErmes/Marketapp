@@ -6,7 +6,7 @@
   },
   "home": {
     "welcome": "مرحباً بكم في",
-    "brandName": "فورين ماركت",
+    "brandName": "Dardyali",
     "tagline": "بوابتك إلى المنتجات الأصلية من بلدك",
     "browseMarketplace": "تصفح السوق",
     "tasteOfHome": "طعم الوطن، أينما كنت",
@@ -87,6 +87,7 @@
     "terms": "شروط الخدمة",
     "privacy": "سياسة الخصوصية",
     "cookies": "سياسة ملفات تعريف الارتباط",
+    "note": "ملاحظة",
     "followUs": "تابعنا",
     "copyright": "جميع الحقوق محفوظة."
   },

@@ -217,7 +217,7 @@ export const deleteProduct = async (sellerId: string, productId: string): Promis
   }
 
   const response = await fetch(APPS_SCRIPT_URL, {
-    method: "DELETE",
+    method: "POST",
     headers: {
       "Content-Type": "text/plain;charset=utf-8",
     },
@@ -241,6 +241,7 @@ export const placeOrder = async (orderData: {
   productId: string;
   sellerId: string;
   seller_email: string;
+  seller_phone?: string;
   seller_name: string;
   product_name: string;
   buyer_name: string;
@@ -270,6 +271,45 @@ export const placeOrder = async (orderData: {
 
   if (!response.ok) {
     throw new Error(`Failed to place order: ${response.statusText}`);
+  }
+
+  const result = await response.json();
+  return result;
+};
+
+// Place multiple orders in a single request (used by "Order All")
+export const placeBulkOrder = async (payload: {
+  buyer_name: string;
+  buyer_email?: string;
+  buyer_phone?: string;
+  items: Array<{
+    productId: string;
+    sellerId: string;
+    seller_email?: string;
+    seller_phone?: string;
+    seller_name?: string;
+    product_name?: string;
+    quantity: number;
+    total_price: number;
+  }>;
+}): Promise<{ success: boolean; message: string; orderCount?: number; orderIds?: string[] }> => {
+  if (!APPS_SCRIPT_URL) {
+    throw new Error("VITE_APPS_SCRIPT_URL is not configured");
+  }
+
+  const response = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      action: "place_bulk_order",
+      ...payload,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to place bulk orders: ${response.statusText}`);
   }
 
   const result = await response.json();
